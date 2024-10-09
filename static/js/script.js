@@ -60,6 +60,7 @@ let audio = null; // Global variable to track currently playing music
 pauseMusicButton.onclick = function() {
     if (audio && !audio.paused) {
         audio.pause(); // Pause the music if it’s playing
+        saveCurrentState(); 
     } else if (audio && audio.paused) {
         audio.play(); // Resume the music if it’s paused
     } else {
@@ -75,14 +76,38 @@ playMusicButton.onclick = function() {
             audio.pause(); // Pause any currently playing music before starting new music
         }
         audio = new Audio(moodMusic[mood]); // Assign the new music to the global audio object
+        audio.currentTime = 0;
         audio.play();
+        saveCurrentState(); 
         moodModal.style.display = "none";
     } else {
         alert("Please select your mood.");
     }
 }
 
+function saveCurrentState() {
+    if (audio) {
+        localStorage.setItem('currentMusic', moodSelect.value);
+        localStorage.setItem('currentTime', audio.currentTime);
+    }
+}
+// Load the previously saved music state on page reload
+function loadSavedState() {
+    const savedMood = localStorage.getItem('currentMusic');
+    const savedTime = localStorage.getItem('currentTime');
+    
+    if (savedMood && moodMusic[savedMood]) {
+        audio = new Audio(moodMusic[savedMood]); // Load the saved music
+        audio.currentTime = savedTime ? parseFloat(savedTime) : 0; // Set the saved time
+        audio.play();
+        moodSelect.value = savedMood; // Set the mood select to the saved mood
+    }
+}
 
+// Load the saved music state when the page is loaded
+window.onload = function() {
+    loadSavedState();
+}
 
 
 document.getElementById('jokeButton').addEventListener('click', function() {
