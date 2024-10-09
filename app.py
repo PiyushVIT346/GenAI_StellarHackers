@@ -20,9 +20,9 @@ def init_session():
         session['history'] = []
 
 # Define function to get Gemini response
-def get_gemini_response(question, prompt,mem):
+def get_gemini_response(question, prompt):
     model = genai.GenerativeModel("gemini-pro")
-    response = model.generate_content([prompt[0],mem[0], question])
+    response = model.generate_content([prompt[0],question])
     return response.text
 
 # Define the initial prompt
@@ -42,18 +42,15 @@ prompt = [
     when the user asks something about themselves. If they dont ask something about themselves dont read the description.Don't read the user description until user ask for it."""]
 
 
-mem = ['''This is a brief description about the user which is to be read only when user asks about themselves like name, age , birthday etc .Until dont tell about user if not asked''']
-
 # Route for home page
 @app.route("/", methods=["GET", "POST"])
 def index():
     init_session()
     if request.method == "POST":
         question = request.form.get("message")
-        mem[0]=mem[0]+question+"."
         
         if question:
-            response = get_gemini_response(question, prompt,mem)
+            response = get_gemini_response(question, prompt)
             # Insert new conversation at the beginning of the chat history
             session['history'].insert(0, {
                 "user": question,
